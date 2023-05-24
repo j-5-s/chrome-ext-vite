@@ -20,6 +20,7 @@ const manifest: chrome.runtime.ManifestV3 = {
   chrome_url_overrides: {
     newtab: "src/pages/newtab/index.html",
   },
+  permissions: ["storage", "desktopCapture", "tabs", "activeTab", "scripting"],
   icons: {
     "128": "icon-128.png",
   },
