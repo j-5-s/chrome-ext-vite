@@ -1,9 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import logo from "@assets/img/logo.svg";
 import "@pages/newtab/Newtab.css";
 import "@pages/newtab/Newtab.scss";
+import { usePersistedState } from "@src/common/msg/usePersistedState";
 
 const Newtab = () => {
+  const { value, actions } = usePersistedState("test", "default value");
+  useEffect(() => {
+    setTimeout(() => {
+      actions.setState("foobar");
+    }, 1000);
+  }, []);
   return (
     <div className="App">
       <header className="App-header">
@@ -17,7 +24,7 @@ const Newtab = () => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React!
+          Learn React!{value}
         </a>
         <h6>The color of this paragraph is defined using SASS.</h6>
       </header>
