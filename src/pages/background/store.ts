@@ -5,22 +5,23 @@ export class ChromeStorageLocal {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  updateState(key: string, value: any) {
+  updateState(key: string, value: any): Promise<any> {
     return new Promise((resolve) => {
       chrome.storage.local.get([this.key], ({ state }) => {
+        const updatedState = {
+          ...state,
+          [key]: value,
+        };
         chrome.storage.local.set({
           // remove bookmark folders from taking up unnecessary space
-          state: {
-            ...state,
-            [key]: value,
-          },
+          state: updatedState,
         });
-        resolve({ key, value });
+        resolve({ key, value, state: updatedState });
       });
     });
   }
 
-  getState() {
+  getState<T>(): Promise<T> {
     return new Promise((resolve) => {
       chrome.storage.local.get([this.key], ({ state }) => {
         resolve(state);

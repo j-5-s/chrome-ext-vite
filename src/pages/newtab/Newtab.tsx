@@ -5,12 +5,8 @@ import "@pages/newtab/Newtab.scss";
 import { usePersistedState } from "@src/common/msg/usePersistedState";
 
 const Newtab = () => {
-  const { value, actions } = usePersistedState("test", "default value");
-  useEffect(() => {
-    setTimeout(() => {
-      actions.setState("foobar");
-    }, 1000);
-  }, []);
+  const { value, actions } = usePersistedState("countObj", { count: 0 });
+
   return (
     <div className="App">
       <header className="App-header">
@@ -24,8 +20,14 @@ const Newtab = () => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React!{value}
+          Learn React!{value.count}
         </a>
+        <button
+          onClick={() => actions.updateState("count", (value.count || 0) + 1)}
+        >
+          Increment
+        </button>{" "}
+        {value.count}
         <h6>The color of this paragraph is defined using SASS.</h6>
       </header>
     </div>

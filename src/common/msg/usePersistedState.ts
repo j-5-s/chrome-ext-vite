@@ -6,20 +6,21 @@ export function usePersistedState<T>(key: string, initialValue?: T) {
 
   const [state, setState] = useState({
     loading: true,
-    key,
-    initialValue,
-    value: initialValue,
+    value: {
+      [key]: initialState,
+    },
   });
   const msgContext = useContext(MsgContext);
 
   const listener = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (msg: any) => {
-      if (msg.type !== "setState" && key !== msg.key) return;
-
       setState((existing) => ({
-        ...existing,
         loading: false,
-        value: msg.value,
+        value: {
+          ...existing.value,
+          [key]: msg.value[key],
+        },
       }));
     },
     [key]
@@ -33,20 +34,24 @@ export function usePersistedState<T>(key: string, initialValue?: T) {
   }, [msgContext.connection.onMessage, listener]);
 
   const actions = {
+    // @deprecated
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setState: (value: any) => {
       setState((existing) => ({ ...existing, loading: true }));
       msgContext.connection.postMessage({ type: "setState", key, value });
     },
     updateState: <T>(stateKey: string, value: T) => {
       setState((existing) => ({ ...existing, loading: true }));
-      const valueState = {
-        ...state.value,
-        [stateKey]: value,
-      };
+
       msgContext.connection.postMessage({
-        type: "setState",
+        type: "updateState",
         key,
-        value: valueState,
+        value: {
+          [key]: {
+            ...state.value[key],
+            [stateKey]: value,
+          },
+        },
       });
     },
   };
@@ -62,6 +67,6 @@ export function usePersistedState<T>(key: string, initialValue?: T) {
   return {
     actions,
     loading: state.loading,
-    value: state.value as T,
+    value: state.value[key] as T,
   };
 }

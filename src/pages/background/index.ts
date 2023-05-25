@@ -43,25 +43,49 @@ chrome.runtime.onConnect.addListener(function (port) {
   port.onMessage.addListener(function (msg) {
     konsole.log("onMessage", msg);
     if (msg.type === "initialState") {
-      store.getState().then((state) => {
-        konsole.log("initialState", msg.initialValue, state);
+      store.getState().then((state: any) => {
+        konsole.log("initialState", msg.initialState, state);
         publish({
           type: msg.type,
-          value: state?.[msg.key] || msg.initialValue,
+          value: {
+            [msg.key]:
+              typeof msg.initialState === "object"
+                ? { ...msg.initialState }
+                : msg.initialState,
+            ...state,
+          },
           key: msg.key,
           ack: true,
         });
       });
     }
-    if (msg.type === "setState") {
-      store.updateState(msg.key, msg.value).then(() => {
-        publish({
-          type: msg.type,
-          value: msg.value,
-          key: msg.key,
-          ack: true,
+    if (msg.type === "updateState") {
+      store
+        .updateState(msg.key, msg.value[msg.key])
+        .then(({ state }: { state: any }) => {
+          publish({
+            type: msg.type,
+            value: {
+              ...state,
+            },
+            key: msg.key,
+            ack: true,
+          });
         });
-      });
+    }
+    if (msg.type === "setState") {
+      store
+        .updateState(msg.key, msg.value)
+        .then(({ state }: { state: any }) => {
+          publish({
+            type: msg.type,
+            value: {
+              ...state,
+            },
+            key: msg.key,
+            ack: true,
+          });
+        });
     }
   });
 });
